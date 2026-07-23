@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("MEDICO")
+  createdAt DateTime @default(now())
+
+  solicitudes   Solicitud[]   @relation("MedicoSolicitudes")
+  autorizaciones Autorizacion[]
+}
+
+model Solicitud {
+  id                 String    @id @default(cuid())
+  medicoId           String
+  pacienteNombre     String
+  pacienteId         String
+  pacienteFechaNac   String?
+  pacienteEdad       String?
+  pacienteSexo       String?
+  pacienteDireccion  String?
+  pacienteMunicipio  String?
+  pacienteTelefono   String?
+  contratante        String?
+  noAtencion         String?
+  tipoConsulta       String?
+  medicoResponsable  String?
+  fechaIngreso       String?
+  servicio           String?
+  especialidad       String?
+  causaExterna       String?
+  descripcion        String?
+  noHistoria         String?
+  estado             String          @default("PENDIENTE")
+  pdfOriginalPath    String?
+  pdfSelloPath       String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  medico      User          @relation("MedicoSolicitudes", fields: [medicoId], references: [id])
+  autorizacion Autorizacion?
+}
+
+model Autorizacion {
+  id              String   @id @default(cuid())
+  solicitudId     String   @unique
+  autorizadorId   String
+  hospitalizar    Boolean  @default(false)
+  ponerEnRemision Boolean  @default(false)
+  cancelaCopago   Boolean  @default(false)
+  autoriza        String
+  autorizaFecha   DateTime @default(now())
+  recibidoFecha   DateTime @default(now())
+  entrega         String
+  createdAt       DateTime @default(now())
+
+  solicitud   Solicitud @relation(fields: [solicitudId], references: [id])
+  autorizador User      @relation(fields: [autorizadorId], references: [id])
+}
